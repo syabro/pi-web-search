@@ -12,12 +12,13 @@ Runtime defaults:
 - keys are read from environment variables, no JSON config is required;
 - configured env providers run in priority order with fallback enabled;
 - if no search provider keys are present, the extension falls back to `duckduckgo-html`;
+- pass `provider` to `web_search` to force one enabled provider by provider name or configured id;
 - use `web_search_status` or `/websearch status` to show enabled providers without exposing keys.
 
 Supported env keys:
 
 - `SERPER_API_KEY`
-- `BRAVE_SEARCH_API_KEY` or `BRAVE_API_KEY`
+- `BRAVE_SEARCH_API_KEY`
 - `TAVILY_API_KEY`
 - `EXA_API_KEY`
 - `PERPLEXITY_API_KEY`

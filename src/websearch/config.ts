@@ -191,7 +191,7 @@ function envProvider(id: string, provider: SearchProvider, apiKey: string): Sear
 function configFromEnvironment(env: Environment): { config: WebsearchConfig; source: string } {
 	const providers: SearchProviderEntry[] = [];
 	const serperKey = envValue(env, ["SERPER_API_KEY"]);
-	const braveKey = envValue(env, ["BRAVE_SEARCH_API_KEY", "BRAVE_API_KEY"]);
+	const braveKey = envValue(env, ["BRAVE_SEARCH_API_KEY"]);
 	const tavilyKey = envValue(env, ["TAVILY_API_KEY"]);
 	const exaKey = envValue(env, ["EXA_API_KEY"]);
 	const perplexityKey = envValue(env, ["PERPLEXITY_API_KEY"]);

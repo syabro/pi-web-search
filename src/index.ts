@@ -9,6 +9,7 @@ import type { SearchErrorDetails, SearchProgressDetails, SearchRenderDetails, Se
 const Params = Type.Object(
 	{
 		query: Type.String({ minLength: 2, description: "The search query to use" }),
+		provider: Type.Optional(Type.String({ description: "Optional enabled provider name or configured provider id to use for this search" })),
 		allowed_domains: Type.Optional(Type.Array(Type.String(), { description: "Only include search results from these domains" })),
 		blocked_domains: Type.Optional(Type.Array(Type.String(), { description: "Never include search results from these domains" })),
 	},
@@ -19,6 +20,7 @@ const StatusParams = Type.Object({}, { additionalProperties: false });
 
 type WebSearchParams = {
 	query: string;
+	provider?: string;
 	allowed_domains?: string[];
 	blocked_domains?: string[];
 };
@@ -74,7 +76,7 @@ const PROVIDER_NAMES: Record<string, string> = {
 
 const ENABLE_REQUIREMENTS: Record<string, string> = {
 	serper: "SERPER_API_KEY",
-	brave: "BRAVE_SEARCH_API_KEY or BRAVE_API_KEY",
+	brave: "BRAVE_SEARCH_API_KEY",
 	tavily: "TAVILY_API_KEY",
 	exa: "EXA_API_KEY",
 	perplexity: "PERPLEXITY_API_KEY",
@@ -90,7 +92,7 @@ const ENABLE_REQUIREMENTS: Record<string, string> = {
 
 const ENV_CONFIGURATIONS: Record<string, string> = {
 	serper: "SERPER_API_KEY",
-	brave: "BRAVE_SEARCH_API_KEY or BRAVE_API_KEY",
+	brave: "BRAVE_SEARCH_API_KEY",
 	tavily: "TAVILY_API_KEY",
 	exa: "EXA_API_KEY",
 	perplexity: "PERPLEXITY_API_KEY",
@@ -113,6 +115,23 @@ function enabledConfiguration(provider: string, source: string): string {
 
 function providerLabel(provider: SearchProviderEntry): string {
 	return provider.id ? `${provider.id}/${provider.provider}` : provider.provider;
+}
+
+function normalizedProviderSelector(value: string): string {
+	return value.trim().toLowerCase();
+}
+
+function matchesProviderSelector(provider: SearchProviderEntry, selector: string): boolean {
+	const normalized = normalizedProviderSelector(selector);
+	return provider.provider.toLowerCase() === normalized || provider.id?.toLowerCase() === normalized;
+}
+
+function providerSelectionError(selector: string, enabledProviders: SearchProviderEntry[]): string {
+	const normalized = normalizedProviderSelector(selector);
+	const knownProvider = STATUS_PROVIDER_ORDER.find((provider) => provider === normalized);
+	if (knownProvider) return `Provider ${providerName(knownProvider)} is not enabled. Configuration: ${enableRequirement(knownProvider)}.`;
+	const enabled = enabledProviders.length ? enabledProviders.map(providerLabel).join(", ") : "none";
+	return `Provider ${selector} is not configured. Enabled providers: ${enabled}.`;
 }
 
 function formatSearchProgressText(details: SearchProgressDetails): string {
@@ -149,6 +168,44 @@ function renderTextTable(rows: ProviderStatusRow[], state: ProviderStatusRow["st
 	const divider = `${"─".repeat(providerWidth)}  ${"─".repeat(configWidth)}`;
 	const lines = [header, divider, ...filtered.map((row) => `${pad(row.name, providerWidth)}  ${pad(row.configuration, configWidth)}`)];
 	return state === "Disabled" ? lines.map((line) => theme.fg("muted", line)) : lines;
+}
+
+function toolResultText(result: unknown): string {
+	const content = (result as { content?: Array<{ type?: string; text?: string }> })?.content ?? [];
+	return content.map((block) => (block.type === "text" ? block.text ?? "" : "")).filter(Boolean).join("\n");
+}
+
+function previewLine(line: string): string {
+	const normalized = line.replace(/\s+/g, " ").trimEnd();
+	return normalized.length > 100 ? `${normalized.slice(0, 99)}…` : normalized;
+}
+
+function compactHeader(result: unknown): string | undefined {
+	const details = (result as { details?: { query?: unknown; provider?: unknown } }).details;
+	if (typeof details?.query !== "string" || typeof details.provider !== "string") return undefined;
+	return `${previewLine(details.query)} ${details.provider}`;
+}
+
+function mutedOutput(text: string, theme: any): string {
+	return text.split("\n").map((line) => theme.fg("muted", line)).join("\n");
+}
+
+function expandedToolResult(text: string, header?: string): string {
+	if (!header) return text;
+	const lines = text.split(/\r?\n/);
+	lines[0] = header;
+	return lines.join("\n");
+}
+
+function compactToolResult(text: string, theme: any, header?: string): string {
+	const lines = text.split(/\r?\n/);
+	const leading = header ? [header, ...lines.slice(1, 3).map(previewLine)] : lines.slice(0, 3).map(previewLine);
+	if (lines.length <= 9) return (header ? [header, ...lines.slice(1).map(previewLine)] : lines.map(previewLine)).join("\n");
+	return [
+		...leading,
+		"   ...  press CTRL+O to show full result ...",
+		...lines.slice(-3).map(previewLine),
+	].join("\n");
 }
 
 async function showProviderStatus(status: { text: string; details: ProviderStatusDetails }, ctx: any): Promise<void> {
@@ -279,7 +336,15 @@ export default function webSearchExtension(pi: ExtensionAPI): void {
 			if (typeof input.q === "string" && input.query === undefined) return { ...input, query: input.q } as WebSearchParams;
 			return args as WebSearchParams;
 		},
+		renderResult(result, options, theme) {
+			if (options.isPartial) return new Text(`\n${theme.fg("warning", "Searching...")}`, 0, 0);
+			const text = toolResultText(result);
+			const header = compactHeader(result);
+			const rendered = options.expanded ? expandedToolResult(text, header) : compactToolResult(text, theme, header);
+			return new Text(`\n${mutedOutput(rendered, theme)}`, 0, 0);
+		},
 		async execute(_toolCallId, params: WebSearchParams, signal, onUpdate, ctx?: ToolContext) {
+			const selectedProvider = params.provider?.trim();
 			if (params.allowed_domains?.length && params.blocked_domains?.length) {
 				const message = "Error: Cannot specify both allowed_domains and blocked_domains in the same request";
 				const details = searchErrorDetails(params.query, message);
@@ -292,7 +357,14 @@ export default function webSearchExtension(pi: ExtensionAPI): void {
 				return { content: [{ type: "text", text: loaded.message }], details };
 			}
 
-			const config = loaded.config;
+			const config = selectedProvider
+				? { ...loaded.config, providers: loaded.config.providers.filter((provider) => matchesProviderSelector(provider, selectedProvider)) }
+				: loaded.config;
+			if (selectedProvider && config.providers.length === 0) {
+				const message = providerSelectionError(selectedProvider, loaded.config.providers);
+				const details = searchErrorDetails(params.query, message);
+				return { content: [{ type: "text", text: message }], details };
+			}
 			const maxResults = config.providers[0]?.maxResults ?? 10;
 			const progressDetails: SearchProgressDetails = {
 				phase: "searching",
