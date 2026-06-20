@@ -56,11 +56,12 @@ type ProviderStatusDetails = {
 	reason?: string;
 };
 
-const STATUS_PROVIDER_ORDER = ["serper", "brave", "tavily", "exa", "perplexity", "google-cse", "duckduckgo-html", "z-ai", "openai", "codex", "anthropic", "xai", "kimi"] as const;
+const STATUS_PROVIDER_ORDER = ["serper", "brave", "parallel", "tavily", "exa", "perplexity", "google-cse", "duckduckgo-html", "z-ai", "openai", "codex", "anthropic", "xai", "kimi"] as const;
 
 const PROVIDER_NAMES: Record<string, string> = {
 	serper: "Serper",
 	brave: "Brave",
+	parallel: "Parallel",
 	tavily: "Tavily",
 	exa: "Exa",
 	perplexity: "Perplexity",
@@ -77,6 +78,7 @@ const PROVIDER_NAMES: Record<string, string> = {
 const ENABLE_REQUIREMENTS: Record<string, string> = {
 	serper: "SERPER_API_KEY",
 	brave: "BRAVE_SEARCH_API_KEY",
+	parallel: "PARALLEL_API_KEY",
 	tavily: "TAVILY_API_KEY",
 	exa: "EXA_API_KEY",
 	perplexity: "PERPLEXITY_API_KEY",
@@ -93,6 +95,7 @@ const ENABLE_REQUIREMENTS: Record<string, string> = {
 const ENV_CONFIGURATIONS: Record<string, string> = {
 	serper: "SERPER_API_KEY",
 	brave: "BRAVE_SEARCH_API_KEY",
+	parallel: "PARALLEL_API_KEY",
 	tavily: "TAVILY_API_KEY",
 	exa: "EXA_API_KEY",
 	perplexity: "PERPLEXITY_API_KEY",

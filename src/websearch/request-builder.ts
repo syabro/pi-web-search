@@ -111,6 +111,28 @@ export function buildSearchRequest(config: SearchProviderConfig, request: Search
 		};
 	}
 
+	if (config.provider === "parallel") {
+		const sourcePolicy: JsonObject = {};
+		if (allowedDomains) sourcePolicy.include_domains = allowedDomains;
+		if (blockedDomains) sourcePolicy.exclude_domains = blockedDomains;
+		const advancedSettings: JsonObject = {
+			max_results: clamp(maxResults, 1, 20),
+			excerpt_settings: { max_chars_per_result: 700 },
+		};
+		if (Object.keys(sourcePolicy).length > 0) advancedSettings.source_policy = sourcePolicy;
+		const body: JsonObject = {
+			objective: request.query,
+			search_queries: [request.query],
+			advanced_settings: advancedSettings,
+		};
+		if (config.model) body.client_model = config.model;
+		return {
+			url: providerUrl(config),
+			init: { method: "POST", headers: contentHeaders({ "x-api-key": config.apiKey ?? "" }) },
+			body,
+		};
+	}
+
 	if (config.provider === "google-cse") {
 		const url = new URL(providerUrl(config));
 		url.searchParams.set("q", appendDomainFilters(request.query, allowedDomains, blockedDomains));

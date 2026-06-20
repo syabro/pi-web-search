@@ -114,6 +114,24 @@ export function normalizeSearchResponse(provider: SearchProvider, payload: unkno
 		);
 	}
 
+	if (provider === "parallel") {
+		return collect(
+			getArray(data.results).map((raw) => {
+				const item = getObject(raw);
+				const url = getString(item?.url);
+				const snippets = getArray(item?.excerpts)
+					.map(getString)
+					.filter((value): value is string => value !== undefined);
+				const searchResult = result(getString(item?.title) ?? url, url, snippets.join("\n\n"));
+				if (searchResult) {
+					const publishedAt = getString(item?.publish_date);
+					if (publishedAt) searchResult.publishedAt = publishedAt;
+				}
+				return searchResult;
+			}),
+		);
+	}
+
 	if (provider === "google-cse") {
 		return collect(
 			getArray(data.items).map((raw) => {

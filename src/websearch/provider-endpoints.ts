@@ -6,6 +6,7 @@ const DEFAULT_PROVIDER_URLS: Record<SearchProvider, string> = {
 	brave: "https://api.search.brave.com/res/v1/web/search",
 	"duckduckgo-html": "https://html.duckduckgo.com/html/",
 	serper: "https://google.serper.dev/search",
+	parallel: "https://api.parallel.ai/v1/search",
 	"google-cse": "https://customsearch.googleapis.com/customsearch/v1",
 	"z-ai": "https://api.z.ai/api/paas/v4/web_search",
 	openai: "https://api.openai.com/v1/responses",

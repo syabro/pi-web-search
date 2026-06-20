@@ -24,6 +24,7 @@ export const SEARCH_PROVIDERS: readonly SearchProvider[] = [
 	"brave",
 	"duckduckgo-html",
 	"serper",
+	"parallel",
 	"google-cse",
 	"z-ai",
 	"openai",
@@ -193,6 +194,7 @@ function configFromEnvironment(env: Environment): { config: WebsearchConfig; sou
 	const serperKey = envValue(env, ["SERPER_API_KEY"]);
 	const braveKey = envValue(env, ["BRAVE_SEARCH_API_KEY"]);
 	const tavilyKey = envValue(env, ["TAVILY_API_KEY"]);
+	const parallelKey = envValue(env, ["PARALLEL_API_KEY"]);
 	const exaKey = envValue(env, ["EXA_API_KEY"]);
 	const perplexityKey = envValue(env, ["PERPLEXITY_API_KEY"]);
 	const googleCseKey = envValue(env, ["GOOGLE_CSE_API_KEY"]);
@@ -200,6 +202,7 @@ function configFromEnvironment(env: Environment): { config: WebsearchConfig; sou
 
 	if (serperKey) providers.push(envProvider("serper-env", "serper", serperKey));
 	if (braveKey) providers.push(envProvider("brave-env", "brave", braveKey));
+	if (parallelKey) providers.push(envProvider("parallel-env", "parallel", parallelKey));
 	if (tavilyKey) providers.push(envProvider("tavily-env", "tavily", tavilyKey));
 	if (exaKey) providers.push(envProvider("exa-env", "exa", exaKey));
 	if (perplexityKey) providers.push(envProvider("perplexity-env", "perplexity", perplexityKey));
