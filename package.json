@@ -1,0 +1,15 @@
+{
+  "name": "pi-web-search",
+  "version": "0.1.0",
+  "description": "Global Pi web_search extension with pluggable providers.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "typebox": "^1.1.24"
+  },
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  }
+}

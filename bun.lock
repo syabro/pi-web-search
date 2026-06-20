@@ -1,0 +1,15 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "pi-web-search",
+      "dependencies": {
+        "typebox": "^1.1.24",
+      },
+    },
+  },
+  "packages": {
+    "typebox": ["typebox@1.2.8", "", {}, "sha512-rlsKhsd7L3082m9nxhFIB4Gl8jizLd/6YlFAWaz96hdV8+VJRjwYaYmDlT0jlTRwkb48SxCSSirqUtrg/HilNw=="],
+  }
+}
