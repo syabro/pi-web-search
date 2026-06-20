@@ -107,6 +107,44 @@ function optionalLocation(value: JsonValue | undefined): SearchUserLocation | un
 	return Object.keys(location).length > 0 ? location : undefined;
 }
 
+function normalizedProviderOrder(values: readonly string[]): string[] | undefined {
+	const order: string[] = [];
+	const seen = new Set<string>();
+	for (const value of values) {
+		const trimmed = value.trim();
+		const normalized = trimmed.toLowerCase();
+		if (!trimmed || seen.has(normalized)) continue;
+		seen.add(normalized);
+		order.push(trimmed);
+	}
+	return order.length > 0 ? order : undefined;
+}
+
+function optionalProviderOrder(value: JsonValue | undefined): string[] | undefined {
+	return isStringArray(value) ? normalizedProviderOrder(value) : undefined;
+}
+
+function parseProviderOrder(value: string | undefined): string[] | undefined {
+	if (!value) return undefined;
+	return normalizedProviderOrder(value.split(","));
+}
+
+function matchesProviderOrder(provider: SearchProviderEntry, selector: string): boolean {
+	const normalized = selector.trim().toLowerCase();
+	return provider.provider.toLowerCase() === normalized || provider.id?.toLowerCase() === normalized;
+}
+
+function applyProviderOrder(providers: SearchProviderEntry[], providerOrder?: readonly string[]): SearchProviderEntry[] {
+	if (!providerOrder?.length) return providers;
+	const remaining = [...providers];
+	const ordered: SearchProviderEntry[] = [];
+	for (const selector of providerOrder) {
+		const index = remaining.findIndex((provider) => matchesProviderOrder(provider, selector));
+		if (index >= 0) ordered.push(...remaining.splice(index, 1));
+	}
+	return [...ordered, ...remaining];
+}
+
 function parseJsonObject(content: string): JsonObject | null {
 	let parsed: unknown;
 	try {
@@ -157,6 +195,7 @@ function providerEntryFromObject(raw: JsonObject): SearchProviderEntry | null {
 
 function configFromObject(raw: JsonObject): WebsearchConfig | null {
 	const auto = optionalBoolean(raw.auto) ?? true;
+	const providerOrder = optionalProviderOrder(raw.providerOrder);
 	const providersValue = raw.providers;
 	const rawProviders = Array.isArray(providersValue) ? providersValue : undefined;
 	if (rawProviders) {
@@ -166,11 +205,12 @@ function configFromObject(raw: JsonObject): WebsearchConfig | null {
 			.filter((entry): entry is SearchProviderEntry => entry !== null);
 		const strategy = optionalStrategy(raw.strategy) ?? "priority";
 		const fallback = optionalBoolean(raw.fallback) ?? true;
-		return { strategy, fallback, auto, providers };
+		const orderedProviders = applyProviderOrder(providers, providerOrder);
+		return { strategy, fallback, auto, providers: orderedProviders, ...(providerOrder ? { providerOrder } : {}) };
 	}
 
 	const provider = providerEntryFromObject(raw);
-	return provider ? { strategy: "priority", fallback: true, auto, providers: [provider] } : null;
+	return provider ? { strategy: "priority", fallback: true, auto, providers: [provider], ...(providerOrder ? { providerOrder } : {}) } : null;
 }
 
 function hasApiKey(config: SearchProviderConfig): boolean {
@@ -191,6 +231,7 @@ function envProvider(id: string, provider: SearchProvider, apiKey: string): Sear
 
 function configFromEnvironment(env: Environment): { config: WebsearchConfig; source: string } {
 	const providers: SearchProviderEntry[] = [];
+	const providerOrder = parseProviderOrder(envValue(env, ["WEB_SEARCH_PROVIDER_ORDER"]));
 	const serperKey = envValue(env, ["SERPER_API_KEY"]);
 	const braveKey = envValue(env, ["BRAVE_SEARCH_API_KEY"]);
 	const tavilyKey = envValue(env, ["TAVILY_API_KEY"]);
@@ -211,7 +252,8 @@ function configFromEnvironment(env: Environment): { config: WebsearchConfig; sou
 	}
 
 	if (providers.length === 0) return { config: DEFAULT_FREE_CONFIG, source: "default:duckduckgo-html" };
-	return { config: { strategy: "priority", fallback: true, auto: false, providers }, source: "env" };
+	const orderedProviders = applyProviderOrder(providers, providerOrder);
+	return { config: { strategy: "priority", fallback: true, auto: false, providers: orderedProviders, ...(providerOrder ? { providerOrder } : {}) }, source: "env" };
 }
 
 export function validateProviderConfig(config: SearchProviderEntry): ProviderValidationResult {

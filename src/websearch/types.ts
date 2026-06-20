@@ -43,6 +43,7 @@ export interface WebsearchConfig {
 	fallback: boolean;
 	auto: boolean;
 	providers: SearchProviderEntry[];
+	providerOrder?: string[];
 }
 
 export interface SearchUserLocation {
