@@ -11,7 +11,8 @@ Runtime defaults:
 
 - keys are read from environment variables, no JSON config is required;
 - configured env providers run in priority order with fallback enabled;
-- if no search provider keys are present, the extension falls back to `duckduckgo-html`.
+- if no search provider keys are present, the extension falls back to `duckduckgo-html`;
+- use `web_search_status` or `/websearch status` to show enabled providers without exposing keys.
 
 Supported env keys:
 

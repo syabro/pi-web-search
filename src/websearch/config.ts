@@ -18,7 +18,7 @@ import type {
 	WebsearchConfig,
 } from "./types.ts";
 
-const PROVIDERS: readonly SearchProvider[] = [
+export const SEARCH_PROVIDERS: readonly SearchProvider[] = [
 	"exa",
 	"tavily",
 	"brave",
@@ -77,7 +77,7 @@ function optionalBoolean(value: JsonValue | undefined): boolean | undefined {
 }
 
 function optionalProvider(value: JsonValue | undefined): SearchProvider | undefined {
-	return oneOf(PROVIDERS, value) ? value : undefined;
+	return oneOf(SEARCH_PROVIDERS, value) ? value : undefined;
 }
 
 function optionalContextSize(value: JsonValue | undefined): SearchContextSize | undefined {
@@ -212,7 +212,7 @@ function configFromEnvironment(env: Environment): { config: WebsearchConfig; sou
 }
 
 export function validateProviderConfig(config: SearchProviderEntry): ProviderValidationResult {
-	if (!PROVIDERS.includes(config.provider)) {
+	if (!SEARCH_PROVIDERS.includes(config.provider)) {
 		return { ok: false, reason: "invalid_config", message: `Unsupported provider: ${config.provider}` };
 	}
 

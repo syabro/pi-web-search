@@ -5,7 +5,8 @@
   "type": "module",
   "main": "./src/index.ts",
   "dependencies": {
-    "typebox": "^1.1.24"
+    "typebox": "^1.1.24",
+    "@earendil-works/pi-tui": "0.74.0"
   },
   "pi": {
     "extensions": [
