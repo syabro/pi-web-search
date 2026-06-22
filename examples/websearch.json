@@ -1,0 +1,23 @@
+{
+  "strategy": "priority",
+  "fallback": true,
+  "auto": false,
+  "providerOrder": ["parallel", "serper", "brave", "tavily", "exa"],
+  "providers": [
+    {
+      "id": "parallel-main",
+      "provider": "parallel",
+      "maxResults": 10
+    },
+    {
+      "id": "serper-fallback",
+      "provider": "serper",
+      "maxResults": 10
+    },
+    {
+      "id": "brave-fallback",
+      "provider": "brave",
+      "maxResults": 10
+    }
+  ]
+}

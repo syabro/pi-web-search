@@ -113,6 +113,7 @@ function enableRequirement(provider: string): string {
 
 function enabledConfiguration(provider: string, source: string): string {
 	if (source === "env") return ENV_CONFIGURATIONS[provider] ?? "environment";
+	if (source.startsWith("env+")) return ENV_CONFIGURATIONS[provider] ?? source.slice(4);
 	return source;
 }
 

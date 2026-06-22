@@ -195,6 +195,8 @@ function providerEntryFromObject(raw: JsonObject): SearchProviderEntry | null {
 
 function configFromObject(raw: JsonObject): WebsearchConfig | null {
 	const auto = optionalBoolean(raw.auto) ?? true;
+	const strategy = optionalStrategy(raw.strategy) ?? "priority";
+	const fallback = optionalBoolean(raw.fallback) ?? true;
 	const providerOrder = optionalProviderOrder(raw.providerOrder);
 	const providersValue = raw.providers;
 	const rawProviders = Array.isArray(providersValue) ? providersValue : undefined;
@@ -203,14 +205,16 @@ function configFromObject(raw: JsonObject): WebsearchConfig | null {
 		const providers = rawProviders
 			.map((value) => (isJsonObject(value) ? providerEntryFromObject(value) : null))
 			.filter((entry): entry is SearchProviderEntry => entry !== null);
-		const strategy = optionalStrategy(raw.strategy) ?? "priority";
-		const fallback = optionalBoolean(raw.fallback) ?? true;
 		const orderedProviders = applyProviderOrder(providers, providerOrder);
 		return { strategy, fallback, auto, providers: orderedProviders, ...(providerOrder ? { providerOrder } : {}) };
 	}
 
 	const provider = providerEntryFromObject(raw);
-	return provider ? { strategy: "priority", fallback: true, auto, providers: [provider], ...(providerOrder ? { providerOrder } : {}) } : null;
+	if (provider) return { strategy, fallback, auto, providers: [provider], ...(providerOrder ? { providerOrder } : {}) };
+	if (providerOrder || raw.strategy !== undefined || raw.fallback !== undefined || raw.auto !== undefined) {
+		return { strategy, fallback, auto, providers: [], ...(providerOrder ? { providerOrder } : {}) };
+	}
+	return null;
 }
 
 function hasApiKey(config: SearchProviderConfig): boolean {
@@ -229,7 +233,12 @@ function envProvider(id: string, provider: SearchProvider, apiKey: string): Sear
 	return { id, provider, apiKey, maxResults: DEFAULT_MAX_RESULTS };
 }
 
-function configFromEnvironment(env: Environment): { config: WebsearchConfig; source: string } {
+interface EnvironmentConfigParts {
+	providers: SearchProviderEntry[];
+	providerOrder?: string[];
+}
+
+function environmentConfigParts(env: Environment): EnvironmentConfigParts {
 	const providers: SearchProviderEntry[] = [];
 	const providerOrder = parseProviderOrder(envValue(env, ["WEB_SEARCH_PROVIDER_ORDER"]));
 	const serperKey = envValue(env, ["SERPER_API_KEY"]);
@@ -251,9 +260,39 @@ function configFromEnvironment(env: Environment): { config: WebsearchConfig; sou
 		providers.push({ id: "google-cse-env", provider: "google-cse", apiKey: googleCseKey, searchEngineId: googleCseId, maxResults: DEFAULT_MAX_RESULTS });
 	}
 
-	if (providers.length === 0) return { config: DEFAULT_FREE_CONFIG, source: "default:duckduckgo-html" };
-	const orderedProviders = applyProviderOrder(providers, providerOrder);
-	return { config: { strategy: "priority", fallback: true, auto: false, providers: orderedProviders, ...(providerOrder ? { providerOrder } : {}) }, source: "env" };
+	return { providers, ...(providerOrder ? { providerOrder } : {}) };
+}
+
+function configFromEnvironmentParts(parts: EnvironmentConfigParts): { config: WebsearchConfig; source: string } {
+	if (parts.providers.length === 0) return { config: DEFAULT_FREE_CONFIG, source: "default:duckduckgo-html" };
+	const orderedProviders = applyProviderOrder(parts.providers, parts.providerOrder);
+	return { config: { strategy: "priority", fallback: true, auto: false, providers: orderedProviders, ...(parts.providerOrder ? { providerOrder: parts.providerOrder } : {}) }, source: "env" };
+}
+
+function mergeEnvProvider(envProvider: SearchProviderEntry, jsonProviders: SearchProviderEntry[]): SearchProviderEntry {
+	const settings = jsonProviders.find((provider) => provider.provider === envProvider.provider);
+	if (!settings) return envProvider;
+	const merged = { ...settings, ...envProvider };
+	if (settings.id) merged.id = settings.id;
+	if (settings.maxResults !== undefined) merged.maxResults = settings.maxResults;
+	return merged;
+}
+
+function providerHasInlineCredential(provider: SearchProviderEntry): boolean {
+	return provider.provider === "duckduckgo-html" || hasApiKey(provider);
+}
+
+function mergeConfigWithEnvironment(config: WebsearchConfig, envParts: EnvironmentConfigParts): WebsearchConfig {
+	const envProviderNames = new Set(envParts.providers.map((provider) => provider.provider));
+	const envProviders = envParts.providers.map((provider) => mergeEnvProvider(provider, config.providers));
+	const jsonProviders = config.providers.filter((provider) => !envProviderNames.has(provider.provider) && providerHasInlineCredential(provider));
+	const providerOrder = envParts.providerOrder ?? config.providerOrder;
+	const providers = applyProviderOrder([...envProviders, ...jsonProviders], providerOrder);
+	if (providers.length === 0) {
+		const fallbackProviders = applyProviderOrder(DEFAULT_FREE_CONFIG.providers, providerOrder);
+		return { ...config, providers: fallbackProviders, ...(providerOrder ? { providerOrder } : {}) };
+	}
+	return { ...config, providers, ...(providerOrder ? { providerOrder } : {}) };
 }
 
 export function validateProviderConfig(config: SearchProviderEntry): ProviderValidationResult {
@@ -337,6 +376,7 @@ async function fileExists(path: string): Promise<boolean> {
 
 export async function loadWebsearchConfig(options: ConfigLoadOptions): Promise<ConfigLoadResult> {
 	const home = options.homeDir ?? homedir();
+	const envParts = environmentConfigParts(options.env ?? process.env);
 	const paths = [
 		join(options.cwd, ".pi", "websearch.json"),
 		join(home, "websearch.json"),
@@ -349,16 +389,18 @@ export async function loadWebsearchConfig(options: ConfigLoadOptions): Promise<C
 		if (!raw) {
 			return { ok: false, reason: "invalid_config", message: `Invalid JSON object in ${path}`, source: path };
 		}
-		const config = configFromObject(raw);
-		if (!config) {
+		const parsedConfig = configFromObject(raw);
+		if (!parsedConfig) {
 			return { ok: false, reason: "invalid_config", message: `Invalid provider config in ${path}`, source: path };
 		}
+		const config = mergeConfigWithEnvironment(parsedConfig, envParts);
 		const validation = validateWebsearchConfig(config);
 		if (!validation.ok) return { ...validation, source: path };
-		return { ok: true, config, source: path };
+		const source = envParts.providers.length > 0 ? `env+${path}` : path;
+		return { ok: true, config, source };
 	}
 
-	const envConfig = configFromEnvironment(options.env ?? process.env);
+	const envConfig = configFromEnvironmentParts(envParts);
 	const validation = validateWebsearchConfig(envConfig.config);
 	if (!validation.ok) return { ...validation, source: envConfig.source };
 	return { ok: true, config: envConfig.config, source: envConfig.source };

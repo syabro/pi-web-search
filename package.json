@@ -12,5 +12,25 @@
     "extensions": [
       "./src/index.ts"
     ]
-  }
+  },
+  "license": "MIT",
+  "author": "Syabro",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/syabro/pi-web-search.git"
+  },
+  "homepage": "https://github.com/syabro/pi-web-search#readme",
+  "bugs": {
+    "url": "https://github.com/syabro/pi-web-search/issues"
+  },
+  "keywords": [
+    "pi",
+    "web-search",
+    "search",
+    "parallel",
+    "serper",
+    "brave",
+    "tavily",
+    "exa"
+  ]
 }
