@@ -241,14 +241,14 @@ interface EnvironmentConfigParts {
 function environmentConfigParts(env: Environment): EnvironmentConfigParts {
 	const providers: SearchProviderEntry[] = [];
 	const providerOrder = parseProviderOrder(envValue(env, ["WEB_SEARCH_PROVIDER_ORDER"]));
-	const serperKey = envValue(env, ["SERPER_API_KEY"]);
-	const braveKey = envValue(env, ["BRAVE_SEARCH_API_KEY"]);
-	const tavilyKey = envValue(env, ["TAVILY_API_KEY"]);
-	const parallelKey = envValue(env, ["PARALLEL_API_KEY"]);
-	const exaKey = envValue(env, ["EXA_API_KEY"]);
-	const perplexityKey = envValue(env, ["PERPLEXITY_API_KEY"]);
-	const googleCseKey = envValue(env, ["GOOGLE_CSE_API_KEY"]);
-	const googleCseId = envValue(env, ["GOOGLE_CSE_ID", "GOOGLE_SEARCH_ENGINE_ID"]);
+	const serperKey = envValue(env, ["WEB_SEARCH_SERPER_API_KEY"]);
+	const braveKey = envValue(env, ["WEB_SEARCH_BRAVE_SEARCH_API_KEY"]);
+	const tavilyKey = envValue(env, ["WEB_SEARCH_TAVILY_API_KEY"]);
+	const parallelKey = envValue(env, ["WEB_SEARCH_PARALLEL_API_KEY"]);
+	const exaKey = envValue(env, ["WEB_SEARCH_EXA_API_KEY"]);
+	const perplexityKey = envValue(env, ["WEB_SEARCH_PERPLEXITY_API_KEY"]);
+	const googleCseKey = envValue(env, ["WEB_SEARCH_GOOGLE_CSE_API_KEY"]);
+	const googleCseId = envValue(env, ["WEB_SEARCH_GOOGLE_CSE_ID", "WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID"]);
 
 	if (serperKey) providers.push(envProvider("serper-env", "serper", serperKey));
 	if (braveKey) providers.push(envProvider("brave-env", "brave", braveKey));

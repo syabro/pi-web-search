@@ -76,13 +76,13 @@ const PROVIDER_NAMES: Record<string, string> = {
 };
 
 const ENABLE_REQUIREMENTS: Record<string, string> = {
-	serper: "SERPER_API_KEY",
-	brave: "BRAVE_SEARCH_API_KEY",
-	parallel: "PARALLEL_API_KEY",
-	tavily: "TAVILY_API_KEY",
-	exa: "EXA_API_KEY",
-	perplexity: "PERPLEXITY_API_KEY",
-	"google-cse": "GOOGLE_CSE_API_KEY and GOOGLE_CSE_ID or GOOGLE_SEARCH_ENGINE_ID",
+	serper: "WEB_SEARCH_SERPER_API_KEY",
+	brave: "WEB_SEARCH_BRAVE_SEARCH_API_KEY",
+	parallel: "WEB_SEARCH_PARALLEL_API_KEY",
+	tavily: "WEB_SEARCH_TAVILY_API_KEY",
+	exa: "WEB_SEARCH_EXA_API_KEY",
+	perplexity: "WEB_SEARCH_PERPLEXITY_API_KEY",
+	"google-cse": "WEB_SEARCH_GOOGLE_CSE_API_KEY and WEB_SEARCH_GOOGLE_CSE_ID or WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID",
 	"duckduckgo-html": "No key; fallback when no env providers are enabled",
 	"z-ai": "websearch.json provider with apiKey",
 	openai: "websearch.json provider with apiKey",
@@ -93,13 +93,13 @@ const ENABLE_REQUIREMENTS: Record<string, string> = {
 };
 
 const ENV_CONFIGURATIONS: Record<string, string> = {
-	serper: "SERPER_API_KEY",
-	brave: "BRAVE_SEARCH_API_KEY",
-	parallel: "PARALLEL_API_KEY",
-	tavily: "TAVILY_API_KEY",
-	exa: "EXA_API_KEY",
-	perplexity: "PERPLEXITY_API_KEY",
-	"google-cse": "GOOGLE_CSE_API_KEY and search engine id",
+	serper: "WEB_SEARCH_SERPER_API_KEY",
+	brave: "WEB_SEARCH_BRAVE_SEARCH_API_KEY",
+	parallel: "WEB_SEARCH_PARALLEL_API_KEY",
+	tavily: "WEB_SEARCH_TAVILY_API_KEY",
+	exa: "WEB_SEARCH_EXA_API_KEY",
+	perplexity: "WEB_SEARCH_PERPLEXITY_API_KEY",
+	"google-cse": "WEB_SEARCH_GOOGLE_CSE_API_KEY and search engine id",
 	"duckduckgo-html": "fallback without an API key",
 };
 
