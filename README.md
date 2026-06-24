@@ -4,17 +4,22 @@
 
 # pi-web-search
 
-Free web search for Pi agents — roughly 40,000 searches/month across five free provider quotas.
+Free web search for Pi agents — 22,000 free searches/month, plus ~18,500 starter searches.
 
-Pi gets a `web_search` tool. It tries configured providers in order; if one fails or hits a limit, the next one takes over.
+Pi gets a `web_search` tool and routes across free provider quotas.
 
-Free quotas:
+Monthly free quotas:
 
-- Parallel — ~16,000 requests
-- Exa — 20,000 requests/month
-- Serper — 2,500 queries
+- Exa — 20,000 searches/month
 - Brave — ~1,000 searches/month
 - Tavily — 1,000 searches/month
+
+Starter free quotas:
+
+- Parallel — ~16,000 searches
+- Serper — 2,500 searches
+
+If one provider fails or hits a limit, Pi tries the next one.
 
 ## Quick start
 
