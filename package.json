@@ -20,6 +20,7 @@
     "url": "https://github.com/syabro/pi-web-search/issues"
   },
   "keywords": [
+    "pi-package",
     "pi",
     "web-search",
     "search",
@@ -30,9 +31,9 @@
     "exa"
   ],
   "peerDependencies": {
-    "@earendil-works/pi-coding-agent": "^0.79.0",
-    "@earendil-works/pi-tui": "^0.74.0",
-    "typebox": "^1.1.24"
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
   },
   "devDependencies": {
     "@earendil-works/pi-coding-agent": "^0.79.0",

@@ -1,65 +1,53 @@
 # pi-web-search
 
-Pi extension that adds `web_search` and `web_search_status`.
+Free web search for Pi agents — roughly 40,000 searches/month across five free provider quotas.
 
-Pi agents often need current web data, but reliable search is not always available out of the box. This package adds provider-backed web search to Pi in a few minutes. Start with one free/starter provider key, add more later, and keep search working through fallback routing.
+Pi gets a `web_search` tool. It tries configured providers in order; if one fails or hits a limit, the next one takes over.
 
-If no provider keys are configured, pi-web-search falls back to DuckDuckGo HTML.
+Free quotas:
+
+- Parallel — ~16,000 requests
+- Exa — 20,000 requests/month
+- Serper — 2,500 queries
+- Brave — ~1,000 searches/month
+- Tavily — 1,000 API credits/month
 
 ## Quick start
 
-```bash
-git clone https://github.com/syabro/pi-web-search.git
-cd pi-web-search
-bun install
-```
+1. Install:
 
-Export at least one provider key:
+   ```bash
+   pi install git:github.com/syabro/pi-web-search
+   ```
 
-```bash
-export WEB_SEARCH_PARALLEL_API_KEY="your_key"
-```
+2. Register free accounts:
 
-Add the extension to Pi settings:
+   - Parallel — https://platform.parallel.ai/settings?tab=api-keys
+   - Serper — https://serper.dev/
+   - Brave — https://api-dashboard.search.brave.com/app/plans
+   - Tavily — https://app.tavily.com/
+   - Exa — https://dashboard.exa.ai/api-keys
 
-```json
-{
-  "packages": ["/absolute/path/to/pi-web-search"]
-}
-```
+3. Export the keys in the environment that starts Pi.
 
-Restart Pi, then verify:
+   Use `.env.default` for the exact variable names.
 
-```text
-/websearch status
-```
+4. Restart Pi and verify:
 
-Example use:
+   ```text
+   /websearch status
+   ```
 
-```text
-web_search(query="latest Bun release notes")
-web_search(query="Parallel Search API quickstart", provider="parallel")
-```
+5. Search:
 
-The extension reads the process environment at startup. It does not load `.env` files by itself. Use `.env.default` as a reference for provider keys and free-tier notes.
-
-## Providers
-
-| Provider | Env var | Sign up |
-|---|---|---|
-| Parallel | `WEB_SEARCH_PARALLEL_API_KEY` | https://platform.parallel.ai/settings?tab=api-keys |
-| Serper | `WEB_SEARCH_SERPER_API_KEY` | https://serper.dev/ |
-| Brave | `WEB_SEARCH_BRAVE_SEARCH_API_KEY` | https://api-dashboard.search.brave.com/app/plans |
-| Tavily | `WEB_SEARCH_TAVILY_API_KEY` | https://app.tavily.com/ |
-| Exa | `WEB_SEARCH_EXA_API_KEY` | https://dashboard.exa.ai/api-keys |
-| Perplexity | `WEB_SEARCH_PERPLEXITY_API_KEY` | https://www.perplexity.ai/settings/api |
-| Google CSE | `WEB_SEARCH_GOOGLE_CSE_API_KEY` + `WEB_SEARCH_GOOGLE_CSE_ID` or `WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID` | https://developers.google.com/custom-search/v1/overview |
-
-Also supported through JSON config: OpenAI, Anthropic, xAI, Kimi, Z.AI, Codex.
+   ```text
+   web_search(query="latest Bun release notes")
+   web_search(query="something specific", provider="parallel")
+   ```
 
 ## Provider order and fallback
 
-Set provider order explicitly:
+Set provider order when you want a specific route:
 
 ```bash
 export WEB_SEARCH_PROVIDER_ORDER="parallel,serper,brave,tavily,exa"
@@ -77,7 +65,15 @@ Pass `provider` to force one enabled provider by name or configured id:
 web_search(query="some query", provider="serper")
 ```
 
-If a provider fails and fallback is enabled, pi-web-search tries the next configured provider. If no provider has usable credentials, it uses DuckDuckGo HTML.
+## Optional providers
+
+These are supported, but are not part of the main free five-provider setup:
+
+- Google CSE
+- Perplexity
+- OpenAI, Anthropic, xAI, Kimi, Z.AI, Codex through JSON config
+
+See `.env.default` and `examples/websearch.json` for details.
 
 ## Advanced JSON config
 
@@ -98,14 +94,19 @@ Create `.pi/websearch.json` in the project or `~/.pi/websearch.json` in your hom
 }
 ```
 
-Config rules:
+Rules:
 
 - Project `.pi/websearch.json` is checked before `~/.pi/websearch.json`.
 - The first JSON config file found is used; files are not merged.
 - Env credentials take precedence over matching JSON credentials.
 - `WEB_SEARCH_PROVIDER_ORDER` overrides JSON `providerOrder`.
-- JSON can still provide non-secret provider settings.
-- Restart Pi after changing environment variables.
+
+## Local development
+
+```bash
+git clone https://github.com/syabro/pi-web-search.git
+pi install /absolute/path/to/pi-web-search
+```
 
 ## Credits
 
