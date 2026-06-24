@@ -38,12 +38,16 @@ Free quotas:
    /websearch status
    ```
 
-5. Search:
+5. Ask Pi questions that need current web data.
+
+   Examples:
 
    ```text
-   web_search(query="latest Bun release notes")
-   web_search(query="something specific", provider="parallel")
+   Search the web for the latest Bun release notes.
+   Search the web for current GLM 5.2 benchmarks.
    ```
+
+   Pi will call `web_search` when it needs fresh sources.
 
 ## Provider order and fallback
 
@@ -59,11 +63,7 @@ Without `WEB_SEARCH_PROVIDER_ORDER` or JSON `providerOrder`, env-configured prov
 serper → brave → parallel → tavily → exa → perplexity → google-cse
 ```
 
-Pass `provider` to force one enabled provider by name or configured id:
-
-```text
-web_search(query="some query", provider="serper")
-```
+To force a provider, ask Pi to use one enabled provider by name, for example Serper or Parallel.
 
 ## Optional providers
 
