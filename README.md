@@ -69,7 +69,7 @@ export WEB_SEARCH_PROVIDER_ORDER="parallel,serper,brave,tavily,exa"
 Without `WEB_SEARCH_PROVIDER_ORDER` or JSON `providerOrder`, env-configured providers are recognized in this order:
 
 ```text
-serper → brave → parallel → tavily → exa → perplexity → google-cse
+serper → brave → parallel → tavily → exa → perplexity
 ```
 
 To force a provider, ask Pi to use one enabled provider by name, for example Serper or Parallel.
@@ -78,7 +78,6 @@ To force a provider, ask Pi to use one enabled provider by name, for example Ser
 
 Extra supported providers:
 
-- Google CSE
 - Perplexity
 - OpenAI, Anthropic, xAI, Kimi, Z.AI, Codex through JSON config
 
