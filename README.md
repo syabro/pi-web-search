@@ -14,7 +14,7 @@ Free quotas:
 - Exa — 20,000 requests/month
 - Serper — 2,500 queries
 - Brave — ~1,000 searches/month
-- Tavily — 1,000 API credits/month
+- Tavily — 1,000 searches/month
 
 ## Quick start
 
