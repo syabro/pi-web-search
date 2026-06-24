@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/hero.png" alt="Free web search for Pi agents" />
+</p>
+
 # pi-web-search
 
 Free web search for Pi agents — roughly 40,000 searches/month across five free provider quotas.
