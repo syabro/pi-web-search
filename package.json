@@ -4,10 +4,6 @@
   "description": "Global Pi web_search extension with pluggable providers.",
   "type": "module",
   "main": "./src/index.ts",
-  "dependencies": {
-    "typebox": "^1.1.24",
-    "@earendil-works/pi-tui": "0.74.0"
-  },
   "pi": {
     "extensions": [
       "./src/index.ts"
@@ -32,5 +28,15 @@
     "brave",
     "tavily",
     "exa"
-  ]
+  ],
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.79.0",
+    "@earendil-works/pi-tui": "^0.74.0",
+    "typebox": "^1.1.24"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "^0.79.0",
+    "@earendil-works/pi-tui": "^0.74.0",
+    "typebox": "^1.1.24"
+  }
 }

@@ -1,7 +1,6 @@
 {
   "strategy": "priority",
   "fallback": true,
-  "auto": false,
   "providerOrder": ["parallel", "serper", "brave", "tavily", "exa"],
   "providers": [
     {

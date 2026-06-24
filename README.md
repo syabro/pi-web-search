@@ -2,13 +2,14 @@
 
 Global Pi extension that provides `web_search` and `web_search_status` tools with provider-backed web search, fallback routing, and environment-based configuration.
 
-## Install
+## Quick start
 
 ```bash
 git clone https://github.com/syabro/pi-web-search.git
 cd pi-web-search
 bun install
-cp .env.default .env
+export WEB_SEARCH_PARALLEL_API_KEY="your_parallel_key"
+export WEB_SEARCH_PROVIDER_ORDER="parallel,serper,brave,tavily,exa"
 ```
 
 Add the checkout path to Pi settings:
@@ -19,13 +20,15 @@ Add the checkout path to Pi settings:
 }
 ```
 
-Restart Pi after changing environment variables. Use `/reload` only for code or package changes.
+Restart Pi after changing environment variables. Then run `/websearch status` or call `web_search_status` to verify enabled providers. Test the tool with `web_search(query="Parallel Search API quickstart", provider="parallel")`.
+
+The `.env.default` file is a reference template. The extension reads the process environment; it does not load `.env` files by itself.
 
 ## Runtime defaults
 
 - Keys are read from environment variables, no JSON config is required.
 - Env keys override matching `apiKey` values in JSON config.
-- JSON config can define defaults such as `providerOrder`, `strategy`, `fallback`, ids, max results, weights, and domain filters.
+- JSON config can define advanced defaults such as `providerOrder`, `strategy`, `fallback`, ids, max results, weights, custom base URLs, model settings, and domain filters.
 - Configured providers run in priority order with fallback enabled.
 - Set `WEB_SEARCH_PROVIDER_ORDER` or `providerOrder` in `websearch.json` to override provider order.
 - If no search provider keys are present, the extension falls back to `duckduckgo-html`.
@@ -35,7 +38,7 @@ Restart Pi after changing environment variables. Use `/reload` only for code or 
 Config resolution:
 
 1. `provider` argument on a `web_search` call selects one enabled provider.
-2. The first JSON config found is loaded: project `.pi/websearch.json`, then `~/websearch.json`, then `~/.pi/websearch.json`.
+2. The first JSON config found is loaded: project `.pi/websearch.json`, then user `~/.pi/websearch.json`.
 3. Environment variables override matching JSON keys and `WEB_SEARCH_PROVIDER_ORDER` overrides JSON `providerOrder`.
 4. JSON can still supply non-secret settings such as ids, max results, weights, and domain filters.
 5. If no configured provider has credentials, the built-in DuckDuckGo HTML fallback is used.
@@ -67,15 +70,17 @@ WEB_SEARCH_PROVIDER_ORDER=parallel,serper,brave,tavily,exa
 
 ## JSON config
 
-Environment variables are enough for normal use. If you need per-provider ids, custom base URLs, weights, or domain filters, create `.pi/websearch.json`, `~/websearch.json`, or `~/.pi/websearch.json`.
+Most users only need env vars. Use JSON only for advanced structured settings: per-provider ids, custom base URLs, weights, max results, model settings, location, or domain filters.
 
-Keep secrets in env when possible. JSON `apiKey` values still work as a fallback when the matching env key is not set.
+Create either project `.pi/websearch.json` or user `~/.pi/websearch.json`.
+
+Prefer env for secrets. JSON `apiKey` values still work as a fallback when the matching env key is not set.
 
 See `examples/websearch.json` for a minimal provider list. Providers named only in `providerOrder` can still be enabled through env keys.
 
 ## Later work
 
-- Random or round-robin provider routing.
+- Random provider routing.
 - Cooldown/exhaustion tracking for quota, billing, auth, and rate-limit failures.
 
 ## Credits

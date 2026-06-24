@@ -39,7 +39,6 @@ type ProviderStatusDetails = {
 	source?: string;
 	strategy?: string;
 	fallback?: boolean;
-	auto?: boolean;
 	providerCount?: number;
 	providers?: Array<{
 		label: string;
@@ -288,7 +287,6 @@ async function loadProviderStatus(cwd: string): Promise<{ text: string; details:
 			source: loaded.source,
 			strategy: loaded.config.strategy,
 			fallback: loaded.config.fallback,
-			auto: loaded.config.auto,
 			providerCount: providers.length,
 			providers,
 			disabledProviders,

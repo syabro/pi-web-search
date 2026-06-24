@@ -41,7 +41,6 @@ export interface SearchProviderEntry extends SearchProviderConfig {
 export interface WebsearchConfig {
 	strategy: RoutingStrategy;
 	fallback: boolean;
-	auto: boolean;
 	providers: SearchProviderEntry[];
 	providerOrder?: string[];
 }
@@ -101,11 +100,7 @@ export interface SearchProgressDetails {
 	blockedDomains?: string[];
 }
 
-export type ConfigLoadFailureReason =
-	| "missing_config"
-	| "invalid_config"
-	| "missing_api_key"
-	| "provider_native_bypass";
+export type ConfigLoadFailureReason = "invalid_config" | "missing_api_key";
 
 export interface SearchErrorDetails {
 	phase: "error";

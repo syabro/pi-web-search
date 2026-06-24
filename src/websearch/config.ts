@@ -41,7 +41,6 @@ const DEFAULT_MAX_RESULTS = 10;
 const DEFAULT_FREE_CONFIG: WebsearchConfig = {
 	strategy: "priority",
 	fallback: true,
-	auto: false,
 	providers: [{ id: "default", provider: "duckduckgo-html", maxResults: DEFAULT_MAX_RESULTS }],
 };
 
@@ -156,7 +155,7 @@ function parseJsonObject(content: string): JsonObject | null {
 }
 
 function providerEntryFromObject(raw: JsonObject): SearchProviderEntry | null {
-	const provider = optionalProvider(raw.provider) ?? optionalProvider(raw.backend);
+	const provider = optionalProvider(raw.provider);
 	if (!provider) return null;
 
 	const config: SearchProviderEntry = { provider };
@@ -194,7 +193,6 @@ function providerEntryFromObject(raw: JsonObject): SearchProviderEntry | null {
 }
 
 function configFromObject(raw: JsonObject): WebsearchConfig | null {
-	const auto = optionalBoolean(raw.auto) ?? true;
 	const strategy = optionalStrategy(raw.strategy) ?? "priority";
 	const fallback = optionalBoolean(raw.fallback) ?? true;
 	const providerOrder = optionalProviderOrder(raw.providerOrder);
@@ -206,13 +204,13 @@ function configFromObject(raw: JsonObject): WebsearchConfig | null {
 			.map((value) => (isJsonObject(value) ? providerEntryFromObject(value) : null))
 			.filter((entry): entry is SearchProviderEntry => entry !== null);
 		const orderedProviders = applyProviderOrder(providers, providerOrder);
-		return { strategy, fallback, auto, providers: orderedProviders, ...(providerOrder ? { providerOrder } : {}) };
+		return { strategy, fallback, providers: orderedProviders, ...(providerOrder ? { providerOrder } : {}) };
 	}
 
 	const provider = providerEntryFromObject(raw);
-	if (provider) return { strategy, fallback, auto, providers: [provider], ...(providerOrder ? { providerOrder } : {}) };
-	if (providerOrder || raw.strategy !== undefined || raw.fallback !== undefined || raw.auto !== undefined) {
-		return { strategy, fallback, auto, providers: [], ...(providerOrder ? { providerOrder } : {}) };
+	if (provider) return { strategy, fallback, providers: [provider], ...(providerOrder ? { providerOrder } : {}) };
+	if (providerOrder || raw.strategy !== undefined || raw.fallback !== undefined) {
+		return { strategy, fallback, providers: [], ...(providerOrder ? { providerOrder } : {}) };
 	}
 	return null;
 }
@@ -266,7 +264,7 @@ function environmentConfigParts(env: Environment): EnvironmentConfigParts {
 function configFromEnvironmentParts(parts: EnvironmentConfigParts): { config: WebsearchConfig; source: string } {
 	if (parts.providers.length === 0) return { config: DEFAULT_FREE_CONFIG, source: "default:duckduckgo-html" };
 	const orderedProviders = applyProviderOrder(parts.providers, parts.providerOrder);
-	return { config: { strategy: "priority", fallback: true, auto: false, providers: orderedProviders, ...(parts.providerOrder ? { providerOrder: parts.providerOrder } : {}) }, source: "env" };
+	return { config: { strategy: "priority", fallback: true, providers: orderedProviders, ...(parts.providerOrder ? { providerOrder: parts.providerOrder } : {}) }, source: "env" };
 }
 
 function mergeEnvProvider(envProvider: SearchProviderEntry, jsonProviders: SearchProviderEntry[]): SearchProviderEntry {
@@ -350,9 +348,6 @@ export function validateWebsearchConfig(
 	if (!STRATEGIES.includes(config.strategy)) {
 		return { ok: false, reason: "invalid_config", message: `Unsupported routing strategy: ${config.strategy}` };
 	}
-	if (typeof config.auto !== "boolean") {
-		return { ok: false, reason: "invalid_config", message: "Websearch config auto must be a boolean." };
-	}
 	if (config.providers.length === 0) {
 		return { ok: false, reason: "invalid_config", message: "Websearch config requires at least one provider." };
 	}
@@ -379,7 +374,6 @@ export async function loadWebsearchConfig(options: ConfigLoadOptions): Promise<C
 	const envParts = environmentConfigParts(options.env ?? process.env);
 	const paths = [
 		join(options.cwd, ".pi", "websearch.json"),
-		join(home, "websearch.json"),
 		join(home, ".pi", "websearch.json"),
 	];
 
