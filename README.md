@@ -67,7 +67,7 @@ To force a provider, ask Pi to use one enabled provider by name, for example Ser
 
 ## Optional providers
 
-These are supported, but are not part of the main free five-provider setup:
+Extra supported providers:
 
 - Google CSE
 - Perplexity
@@ -75,31 +75,11 @@ These are supported, but are not part of the main free five-provider setup:
 
 See `.env.default` and `examples/websearch.json` for details.
 
-## Advanced JSON config
+## Advanced config
 
-Most users only need env vars. Use JSON for ids, max results, domain filters, custom base URLs, models, weights, or provider order.
+Normal setup uses env vars. For custom limits, domain filters, custom base URLs, model settings, or JSON-only providers, use `.pi/websearch.json` or `~/.pi/websearch.json`.
 
-Create `.pi/websearch.json` in the project or `~/.pi/websearch.json` in your home directory:
-
-```json
-{
-  "strategy": "priority",
-  "fallback": true,
-  "providerOrder": ["parallel", "serper", "brave"],
-  "providers": [
-    { "id": "parallel-main", "provider": "parallel", "maxResults": 10 },
-    { "id": "serper-fallback", "provider": "serper", "maxResults": 10 },
-    { "id": "brave-fallback", "provider": "brave", "maxResults": 10 }
-  ]
-}
-```
-
-Rules:
-
-- Project `.pi/websearch.json` is checked before `~/.pi/websearch.json`.
-- The first JSON config file found is used; files are not merged.
-- Env credentials take precedence over matching JSON credentials.
-- `WEB_SEARCH_PROVIDER_ORDER` overrides JSON `providerOrder`.
+See `examples/websearch.json`.
 
 ## Local development
 
