@@ -1,6 +1,10 @@
-# Pi web_search
+# pi-web-search
 
-Global Pi extension that provides `web_search` and `web_search_status` tools with provider-backed web search, fallback routing, and environment-based configuration.
+Pi extension that adds `web_search` and `web_search_status`.
+
+Pi agents often need current web data, but reliable search is not always available out of the box. This package adds provider-backed web search to Pi in a few minutes. Start with one free/starter provider key, add more later, and keep search working through fallback routing.
+
+If no provider keys are configured, pi-web-search falls back to DuckDuckGo HTML.
 
 ## Quick start
 
@@ -8,81 +12,103 @@ Global Pi extension that provides `web_search` and `web_search_status` tools wit
 git clone https://github.com/syabro/pi-web-search.git
 cd pi-web-search
 bun install
-export WEB_SEARCH_PARALLEL_API_KEY="your_parallel_key"
-export WEB_SEARCH_PROVIDER_ORDER="parallel,serper,brave,tavily,exa"
 ```
 
-Add the checkout path to Pi settings:
+Export at least one provider key:
+
+```bash
+export WEB_SEARCH_PARALLEL_API_KEY="your_key"
+```
+
+Add the extension to Pi settings:
 
 ```json
 {
-  "packages": ["/path/to/pi-web-search"]
+  "packages": ["/absolute/path/to/pi-web-search"]
 }
 ```
 
-Restart Pi after changing environment variables. Then run `/websearch status` or call `web_search_status` to verify enabled providers. Test the tool with `web_search(query="Parallel Search API quickstart", provider="parallel")`.
+Restart Pi, then verify:
 
-The `.env.default` file is a reference template. The extension reads the process environment; it does not load `.env` files by itself.
-
-## Runtime defaults
-
-- Keys are read from environment variables, no JSON config is required.
-- Env keys override matching `apiKey` values in JSON config.
-- JSON config can define advanced defaults such as `providerOrder`, `strategy`, `fallback`, ids, max results, weights, custom base URLs, model settings, and domain filters.
-- Configured providers run in priority order with fallback enabled.
-- Set `WEB_SEARCH_PROVIDER_ORDER` or `providerOrder` in `websearch.json` to override provider order.
-- If no search provider keys are present, the extension falls back to `duckduckgo-html`.
-- Pass `provider` to `web_search` to force one enabled provider by provider name or configured id.
-- Use `web_search_status` or `/websearch status` to show enabled providers without exposing keys.
-
-Config resolution:
-
-1. `provider` argument on a `web_search` call selects one enabled provider.
-2. The first JSON config found is loaded: project `.pi/websearch.json`, then user `~/.pi/websearch.json`.
-3. Environment variables override matching JSON keys and `WEB_SEARCH_PROVIDER_ORDER` overrides JSON `providerOrder`.
-4. JSON can still supply non-secret settings such as ids, max results, weights, and domain filters.
-5. If no configured provider has credentials, the built-in DuckDuckGo HTML fallback is used.
-
-## Recommended setup
-
-- Use Parallel first for agent-oriented search results with compressed excerpts and a large starter credit.
-- Use Serper second as a Google SERP fallback with simple setup and good free quota.
-- Use Brave third as an independent-index fallback with monthly credits.
-- Add Tavily or Exa when another quota pool or semantic search behavior is useful.
-- Keep DuckDuckGo HTML as the no-key fallback only.
-
-Recommended env order:
-
-```env
-WEB_SEARCH_PROVIDER_ORDER=parallel,serper,brave,tavily,exa
+```text
+/websearch status
 ```
 
-## Environment keys
+Example use:
 
-- `WEB_SEARCH_PROVIDER_ORDER`
-- `WEB_SEARCH_SERPER_API_KEY`
-- `WEB_SEARCH_BRAVE_SEARCH_API_KEY`
-- `WEB_SEARCH_PARALLEL_API_KEY`
-- `WEB_SEARCH_TAVILY_API_KEY`
-- `WEB_SEARCH_EXA_API_KEY`
-- `WEB_SEARCH_PERPLEXITY_API_KEY`
-- `WEB_SEARCH_GOOGLE_CSE_API_KEY` plus `WEB_SEARCH_GOOGLE_CSE_ID` or `WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID`
+```text
+web_search(query="latest Bun release notes")
+web_search(query="Parallel Search API quickstart", provider="parallel")
+```
 
-## JSON config
+The extension reads the process environment at startup. It does not load `.env` files by itself. Use `.env.default` as a reference for provider keys and free-tier notes.
 
-Most users only need env vars. Use JSON only for advanced structured settings: per-provider ids, custom base URLs, weights, max results, model settings, location, or domain filters.
+## Providers
 
-Create either project `.pi/websearch.json` or user `~/.pi/websearch.json`.
+| Provider | Env var | Sign up |
+|---|---|---|
+| Parallel | `WEB_SEARCH_PARALLEL_API_KEY` | https://platform.parallel.ai/settings?tab=api-keys |
+| Serper | `WEB_SEARCH_SERPER_API_KEY` | https://serper.dev/ |
+| Brave | `WEB_SEARCH_BRAVE_SEARCH_API_KEY` | https://api-dashboard.search.brave.com/app/plans |
+| Tavily | `WEB_SEARCH_TAVILY_API_KEY` | https://app.tavily.com/ |
+| Exa | `WEB_SEARCH_EXA_API_KEY` | https://dashboard.exa.ai/api-keys |
+| Perplexity | `WEB_SEARCH_PERPLEXITY_API_KEY` | https://www.perplexity.ai/settings/api |
+| Google CSE | `WEB_SEARCH_GOOGLE_CSE_API_KEY` + `WEB_SEARCH_GOOGLE_CSE_ID` or `WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID` | https://developers.google.com/custom-search/v1/overview |
 
-Prefer env for secrets. JSON `apiKey` values still work as a fallback when the matching env key is not set.
+Also supported through JSON config: OpenAI, Anthropic, xAI, Kimi, Z.AI, Codex.
 
-See `examples/websearch.json` for a minimal provider list. Providers named only in `providerOrder` can still be enabled through env keys.
+## Provider order and fallback
 
-## Later work
+Set provider order explicitly:
 
-- Random provider routing.
-- Cooldown/exhaustion tracking for quota, billing, auth, and rate-limit failures.
+```bash
+export WEB_SEARCH_PROVIDER_ORDER="parallel,serper,brave,tavily,exa"
+```
+
+Without `WEB_SEARCH_PROVIDER_ORDER` or JSON `providerOrder`, env-configured providers are recognized in this order:
+
+```text
+serper → brave → parallel → tavily → exa → perplexity → google-cse
+```
+
+Pass `provider` to force one enabled provider by name or configured id:
+
+```text
+web_search(query="some query", provider="serper")
+```
+
+If a provider fails and fallback is enabled, pi-web-search tries the next configured provider. If no provider has usable credentials, it uses DuckDuckGo HTML.
+
+## Advanced JSON config
+
+Most users only need env vars. Use JSON for ids, max results, domain filters, custom base URLs, models, weights, or provider order.
+
+Create `.pi/websearch.json` in the project or `~/.pi/websearch.json` in your home directory:
+
+```json
+{
+  "strategy": "priority",
+  "fallback": true,
+  "providerOrder": ["parallel", "serper", "brave"],
+  "providers": [
+    { "id": "parallel-main", "provider": "parallel", "maxResults": 10 },
+    { "id": "serper-fallback", "provider": "serper", "maxResults": 10 },
+    { "id": "brave-fallback", "provider": "brave", "maxResults": 10 }
+  ]
+}
+```
+
+Config rules:
+
+- Project `.pi/websearch.json` is checked before `~/.pi/websearch.json`.
+- The first JSON config file found is used; files are not merged.
+- Env credentials take precedence over matching JSON credentials.
+- `WEB_SEARCH_PROVIDER_ORDER` overrides JSON `providerOrder`.
+- JSON can still provide non-secret provider settings.
+- Restart Pi after changing environment variables.
 
 ## Credits
 
-This package is based on [`code-yeongyu/pi-websearch`](https://github.com/code-yeongyu/pi-websearch).
+Based on [code-yeongyu/pi-websearch](https://github.com/code-yeongyu/pi-websearch).
+
+MIT license.
