@@ -111,6 +111,18 @@ export function buildSearchRequest(config: SearchProviderConfig, request: Search
 		};
 	}
 
+	if (config.provider === "serpingapi") {
+		const body: JsonObject = {
+			q: appendDomainFilters(request.query, allowedDomains, blockedDomains),
+			num: clamp(maxResults, 1, 100),
+		};
+		return {
+			url: providerUrl(config),
+			init: { method: "POST", headers: contentHeaders({ "X-API-Key": config.apiKey ?? "" }) },
+			body,
+		};
+	}
+
 	if (config.provider === "parallel") {
 		const sourcePolicy: JsonObject = {};
 		if (allowedDomains) sourcePolicy.include_domains = allowedDomains;

@@ -114,6 +114,20 @@ export function normalizeSearchResponse(provider: SearchProvider, payload: unkno
 		);
 	}
 
+	if (provider === "serpingapi") {
+		return collect(
+			getArray(data.organic).map((raw) => {
+				const item = getObject(raw);
+				const searchResult = result(getString(item?.title), getString(item?.link), getString(item?.snippet));
+				if (searchResult) {
+					const publishedAt = getString(item?.date);
+					if (publishedAt) searchResult.publishedAt = publishedAt;
+				}
+				return searchResult;
+			}),
+		);
+	}
+
 	if (provider === "parallel") {
 		return collect(
 			getArray(data.results).map((raw) => {
