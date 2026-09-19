@@ -4,6 +4,7 @@ export type SearchProvider =
 	| "brave"
 	| "duckduckgo-html"
 	| "serper"
+	| "serpingapi"
 	| "parallel"
 	| "google-cse"
 	| "z-ai"
