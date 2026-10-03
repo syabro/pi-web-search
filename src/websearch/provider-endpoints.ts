@@ -7,6 +7,7 @@ const DEFAULT_PROVIDER_URLS: Record<SearchProvider, string> = {
 	"duckduckgo-html": "https://html.duckduckgo.com/html/",
 	serper: "https://google.serper.dev/search",
 	serpingapi: "https://api.serpingapi.com/v1/search",
+	serply: "https://api.serply.io/v1/search",
 	parallel: "https://api.parallel.ai/v1/search",
 	"google-cse": "https://customsearch.googleapis.com/customsearch/v1",
 	"z-ai": "https://api.z.ai/api/paas/v4/web_search",

@@ -128,6 +128,17 @@ export function normalizeSearchResponse(provider: SearchProvider, payload: unkno
 		);
 	}
 
+	if (provider === "serply") {
+		return collect(
+			getArray(data.results).map((raw) => {
+				const item = getObject(raw);
+				const link = getString(item?.link);
+				const url = link && /^https?:\/\//.test(link) ? link : undefined;
+				return result(getString(item?.title), url, getString(item?.description));
+			}),
+		);
+	}
+
 	if (provider === "parallel") {
 		return collect(
 			getArray(data.results).map((raw) => {

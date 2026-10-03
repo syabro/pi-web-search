@@ -5,6 +5,7 @@ export type SearchProvider =
 	| "duckduckgo-html"
 	| "serper"
 	| "serpingapi"
+	| "serply"
 	| "parallel"
 	| "google-cse"
 	| "z-ai"
