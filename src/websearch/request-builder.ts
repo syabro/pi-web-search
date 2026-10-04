@@ -123,6 +123,19 @@ export function buildSearchRequest(config: SearchProviderConfig, request: Search
 		};
 	}
 
+	if (config.provider === "serply") {
+		const url = new URL(providerUrl(config));
+		url.searchParams.set("q", appendDomainFilters(request.query, allowedDomains, blockedDomains));
+		url.searchParams.set("num", String(clamp(maxResults, 1, 10)));
+		return {
+			url: url.toString(),
+			init: {
+				method: "GET",
+				headers: { Accept: "application/json", "User-Agent": "pi-web-search", "X-Api-Key": config.apiKey ?? "" },
+			},
+		};
+	}
+
 	if (config.provider === "parallel") {
 		const sourcePolicy: JsonObject = {};
 		if (allowedDomains) sourcePolicy.include_domains = allowedDomains;
