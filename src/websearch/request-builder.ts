@@ -136,6 +136,25 @@ export function buildSearchRequest(config: SearchProviderConfig, request: Search
 		};
 	}
 
+	if (config.provider === "serpkite") {
+		const url = new URL(providerUrl(config));
+		url.searchParams.set("q", request.query);
+		url.searchParams.set("num", String(clamp(maxResults, 1, 10)));
+		if (allowedDomains) url.searchParams.set("include_domains", allowedDomains.slice(0, 20).join(","));
+		if (blockedDomains) url.searchParams.set("exclude_domains", blockedDomains.slice(0, 20).join(","));
+		return {
+			url: url.toString(),
+			init: {
+				method: "GET",
+				headers: {
+					Accept: "application/json",
+					Authorization: `Bearer ${config.apiKey ?? ""}`,
+					"User-Agent": "pi-web-search",
+				},
+			},
+		};
+	}
+
 	if (config.provider === "parallel") {
 		const sourcePolicy: JsonObject = {};
 		if (allowedDomains) sourcePolicy.include_domains = allowedDomains;

@@ -69,7 +69,7 @@ export WEB_SEARCH_PROVIDER_ORDER="parallel,serper,brave,tavily,exa"
 Without `WEB_SEARCH_PROVIDER_ORDER` or JSON `providerOrder`, env-configured providers are recognized in this order:
 
 ```text
-serper → brave → parallel → tavily → exa → serpingapi → serply → perplexity
+serper → brave → parallel → tavily → exa → serpingapi → serply → serpkite → perplexity
 ```
 
 To force a provider, ask Pi to use one enabled provider by name, for example Serper or Parallel.
@@ -80,6 +80,7 @@ Extra supported providers:
 
 - Serping API — Google results, 1,000 free searches/month, no credit card: https://serpingapi.com/signup (`WEB_SEARCH_SERPINGAPI_API_KEY`)
 - Serply — Google results, 2,500 free credits for 30 days, no credit card: https://serply.io/ (`WEB_SEARCH_SERPLY_API_KEY`)
+- SerpKite — Google results, 2,500 free searches with a GitHub or Google sign-in, then 1,000/month, no credit card: https://serpkite.com/ (`WEB_SEARCH_SERPKITE_API_KEY`)
 - Perplexity
 - OpenAI, Anthropic, xAI, Kimi, Z.AI, Codex through JSON config
 

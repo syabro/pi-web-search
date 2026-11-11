@@ -6,6 +6,7 @@ export type SearchProvider =
 	| "serper"
 	| "serpingapi"
 	| "serply"
+	| "serpkite"
 	| "parallel"
 	| "google-cse"
 	| "z-ai"
