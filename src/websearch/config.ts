@@ -26,6 +26,7 @@ export const SEARCH_PROVIDERS: readonly SearchProvider[] = [
 	"serper",
 	"serpingapi",
 	"serply",
+	"serpkite",
 	"parallel",
 	"google-cse",
 	"z-ai",
@@ -248,6 +249,7 @@ function environmentConfigParts(env: Environment): EnvironmentConfigParts {
 	const exaKey = envValue(env, ["WEB_SEARCH_EXA_API_KEY"]);
 	const serpingapiKey = envValue(env, ["WEB_SEARCH_SERPINGAPI_API_KEY"]);
 	const serplyKey = envValue(env, ["WEB_SEARCH_SERPLY_API_KEY"]);
+	const serpkiteKey = envValue(env, ["WEB_SEARCH_SERPKITE_API_KEY"]);
 	const perplexityKey = envValue(env, ["WEB_SEARCH_PERPLEXITY_API_KEY"]);
 	const googleCseKey = envValue(env, ["WEB_SEARCH_GOOGLE_CSE_API_KEY"]);
 	const googleCseId = envValue(env, ["WEB_SEARCH_GOOGLE_CSE_ID", "WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID"]);
@@ -259,6 +261,7 @@ function environmentConfigParts(env: Environment): EnvironmentConfigParts {
 	if (exaKey) providers.push(envProvider("exa-env", "exa", exaKey));
 	if (serpingapiKey) providers.push(envProvider("serpingapi-env", "serpingapi", serpingapiKey));
 	if (serplyKey) providers.push(envProvider("serply-env", "serply", serplyKey));
+	if (serpkiteKey) providers.push(envProvider("serpkite-env", "serpkite", serpkiteKey));
 	if (perplexityKey) providers.push(envProvider("perplexity-env", "perplexity", perplexityKey));
 	if (googleCseKey && googleCseId) {
 		providers.push({ id: "google-cse-env", provider: "google-cse", apiKey: googleCseKey, searchEngineId: googleCseId, maxResults: DEFAULT_MAX_RESULTS });

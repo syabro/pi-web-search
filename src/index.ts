@@ -55,7 +55,7 @@ type ProviderStatusDetails = {
 	reason?: string;
 };
 
-const STATUS_PROVIDER_ORDER = ["serper", "brave", "parallel", "tavily", "exa", "serpingapi", "serply", "perplexity", "google-cse", "duckduckgo-html", "z-ai", "openai", "codex", "anthropic", "xai", "kimi"] as const;
+const STATUS_PROVIDER_ORDER = ["serper", "brave", "parallel", "tavily", "exa", "serpingapi", "serply", "serpkite", "perplexity", "google-cse", "duckduckgo-html", "z-ai", "openai", "codex", "anthropic", "xai", "kimi"] as const;
 
 const PROVIDER_NAMES: Record<string, string> = {
 	serper: "Serper",
@@ -65,6 +65,7 @@ const PROVIDER_NAMES: Record<string, string> = {
 	exa: "Exa",
 	serpingapi: "Serping API",
 	serply: "Serply",
+	serpkite: "SerpKite",
 	perplexity: "Perplexity",
 	"google-cse": "Google CSE",
 	"duckduckgo-html": "DuckDuckGo HTML",
@@ -84,6 +85,7 @@ const ENABLE_REQUIREMENTS: Record<string, string> = {
 	exa: "WEB_SEARCH_EXA_API_KEY",
 	serpingapi: "WEB_SEARCH_SERPINGAPI_API_KEY",
 	serply: "WEB_SEARCH_SERPLY_API_KEY",
+	serpkite: "WEB_SEARCH_SERPKITE_API_KEY",
 	perplexity: "WEB_SEARCH_PERPLEXITY_API_KEY",
 	"google-cse": "WEB_SEARCH_GOOGLE_CSE_API_KEY and WEB_SEARCH_GOOGLE_CSE_ID or WEB_SEARCH_GOOGLE_SEARCH_ENGINE_ID",
 	"duckduckgo-html": "No key; fallback when no env providers are enabled",
@@ -103,6 +105,7 @@ const ENV_CONFIGURATIONS: Record<string, string> = {
 	exa: "WEB_SEARCH_EXA_API_KEY",
 	serpingapi: "WEB_SEARCH_SERPINGAPI_API_KEY",
 	serply: "WEB_SEARCH_SERPLY_API_KEY",
+	serpkite: "WEB_SEARCH_SERPKITE_API_KEY",
 	perplexity: "WEB_SEARCH_PERPLEXITY_API_KEY",
 	"google-cse": "WEB_SEARCH_GOOGLE_CSE_API_KEY and search engine id",
 	"duckduckgo-html": "fallback without an API key",
